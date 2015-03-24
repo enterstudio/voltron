@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+
+program
+  .command('test', 'Load test cluster with z2z protocol')
+  .parse(process.argv);
+

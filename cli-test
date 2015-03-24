@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var fork = require('child_process').fork;
+var path = require('path');
+
+program
+  .option('-i --instances <number>', 'Number of instances to start. Default 10.', parseInt)
+  .option('-s --sensors <number>', 'Number of sensors per instance', parseInt)
+  .option('-a --actuators <number>', 'Number of actuators per instance', parseInt)
+  .option('--spec <path>', 'Specification file path.');
+  .parse(process.argv);
+
+var url = program.args[0];
+var instances = 10;
+var sensors = 0;
+var actuators = 0;
+
+var disconnects = 0;
+var connects = 0;
+
+if(program.instances) {
+  instances = program.instances;
+}
+
+if(program.sensors) {
+  sensors = program.sensors;
+}
+
+if(program.actuators) {
+  actuators = program.actuators;
+}
+
+var templatePath = 'template_test.js';
+if(program.spec) {
+  var spec = require(program.path);
+  if(spec.instances) {
+    instances = spec.instances;
+  }
+  if(program.sensors) {
+    sensors = spec.sensors;
+  }
+
+  if(program.actuators) {
+    actuators = spec.actuators;
+  }
+
+  if(spec.template) {
+    templatePath = spec.template;
+  }
+}
+
+
+if(!url) {
+  return new Error('Server URL must be provided');
+}
+
+var opts = 
+{
+  env: {
+    "LINK_URL": url,
+    "SENSOR_NUM": sensors,
+    "ACTUATOR_NUM": actuators 
+  }
+};
+
+for(var i = 0; i < instances; i++) {
+  var forked = fork(templatePath, opts);
+  forked.on('message', function(m) {
+    var packet = JSON.parse(m);  
+    if(m.event === 'connect') {
+      connects++; 
+    } else if(m.event === 'disconnect') {
+      disconnects++;
+    }    
+  }); 
+}
+
+

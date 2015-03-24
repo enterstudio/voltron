@@ -1,0 +1,21 @@
+{
+  "name": "zetta-load-test",
+  "version": "0.0.1",
+  "description": "Load test Zetta connections.",
+  "main": "cli",
+  "dependencies": {
+    "zetta": "^0.23.0",
+    "levelup": "^0.19.0",
+    "commander": "^2.7.1",
+    "memdown": "^1.0.0",
+    "zetta-led-mock-driver": "^0.7.1",
+    "uuid": "^2.0.1",
+    "zetta-photocell-mock-driver": "^0.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matthew Dobson <@mdobs>",
+  "license": "MIT"
+}

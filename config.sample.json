@@ -1,0 +1,6 @@
+{
+  "instances": 10,
+  "sensors":1,
+  "actuators":1,
+  "template":"./template_test.js"  
+}
