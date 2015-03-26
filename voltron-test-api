@@ -13,6 +13,8 @@ program
 
 var requestsPerSecond = program.rate;
 var requests = program.requests;
+var clients = program.clients;
+
 
 
 var url = program.args[0];
@@ -23,7 +25,9 @@ if(!url) {
 
 var opts = {
   url: url,
-  requestsPerSecond: requestsPerSecond
+  requestsPerSecond: requestsPerSecond,
+  requests: requests,
+  clients: clients
 };
 
 var trafficFactory = new TrafficFactory(opts);
@@ -34,7 +38,9 @@ var time = duration * 1000;
 
 
 function processData(data) {
-  
+  data.forEach(function(ev) {
+    console.log(ev);  
+  }); 
 }
 
 setTimeout(function() {
