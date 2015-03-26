@@ -1,8 +1,9 @@
 {
-  "name": "zetta-load-test",
-  "version": "0.0.1",
+  "name": "voltron",
+  "version": "0.1.0",
   "description": "Load test Zetta connections.",
   "main": "cli",
+  "bin":"voltron",
   "dependencies": {
     "cli-table": "^0.3.1",
     "commander": "^2.7.1",
