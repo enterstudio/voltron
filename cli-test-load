@@ -1,0 +1,124 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var path = require('path');
+var progress = require('progress');
+var table = require('cli-table');
+var PeerFactory = require('./lib/peer_factory');
+
+program
+  .option('-i --instances <number>', 'Number of instances to start. Default 10.', parseInt)
+  .option('-s --sensors <number>', 'Number of sensors per instance', parseInt)
+  .option('-a --actuators <number>', 'Number of actuators per instance', parseInt)
+  .option('-f, --file', 'Output to a file')
+  .option('-s, --silent', 'Silence output')
+  .option('--spec <path>', 'Specification file path.')
+  .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60.')
+  .parse(process.argv);
+
+var url = program.args[0];
+var instances = 10;
+var sensors = 0;
+var actuators = 0;
+
+var disconnects = 0;
+var connects = 0;
+
+if(program.instances) {
+  instances = program.instances;
+}
+
+if(program.sensors) {
+  sensors = program.sensors;
+}
+
+if(program.actuators) {
+  actuators = program.actuators;
+}
+
+var templatePath = './lib/load_template.js';
+if(program.spec) {
+  var spec = require(program.path);
+  if(spec.instances) {
+    instances = spec.instances;
+  }
+  if(program.sensors) {
+    sensors = spec.sensors;
+  }
+
+  if(program.actuators) {
+    actuators = spec.actuators;
+  }
+
+  if(spec.template) {
+    templatePath = spec.template;
+  }
+}
+var opts = {
+  url: url,
+  sensors: sensors,
+  actuators: actuators,
+  templatePath: templatePath,
+  instances: instances  
+};
+
+console.log('Beginning process spawn.');
+
+var bar = new progress(':bar', { total: instances });
+
+if(!url) {
+  return new Error('Server URL must be provided');
+}
+
+var peerFactory = new PeerFactory(opts);
+
+peerFactory.on('connect', function() {
+  bar.tick();
+  if(bar.complete) {
+   console.log('Completed process spawn. Waiting for connections...');  
+  }
+});
+ 
+peerFactory.start();
+
+function processData(data) {
+  var connectEvents = data.filter(function(ev) { return ev.event === 'connect' });  
+  var disconnectEvents = data.filter(function(ev) { return ev.event === 'disconnect' });
+
+  var connectTableTemplate = ['hub name', 'connectionId', 'start', 'end', 'timeToConnect'];
+  
+
+  var t1 = new table({
+    head: connectTableTemplate
+  });
+
+  connectEvents.forEach(function(ev) {
+    t1.push([ev.name, ev.connectionId, ev.start, ev.end, ev.timeToConnect]); 
+  });
+
+  var disconnectTableTemplate = ['hub name', 'connectionId', 'disconnected', 'duration'];
+  var t2 = new table({
+    head: disconnectTableTemplate
+  });
+
+  disconnectEvents.forEach(function(ev) {
+    t2.push([ev.name, ev.connectionId, ev.disconnected, ev.duration]);   
+  });
+
+  console.log(t1.toString());
+  console.log(t2.toString());
+}
+
+var duration = program.time || 60;
+var time = duration * 1000;
+
+setTimeout(function() {
+  peerFactory.kill();
+  processData(peerFactory.events);
+}, time);
+
+['SIGINT', 'SIGTERM'].forEach(function(signal) {
+  process.on(signal, function() {
+    peerFactory.kill();  
+  });
+});

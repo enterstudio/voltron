@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var TrafficFactory = require('./lib/traffic_factory');
+
+program
+  .option('-u --usage', 'Target server has usage module installed.')
+  .option('-r --requests <requests>', 'Requests to send', parseInt)
+  .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60', parseInt)
+  .option('-c --clients <number>', 'Number of clients to generate', parseInt)
+  .option('-rps --rate <number>', 'Number of requests per second', parseInt)
+  .parse(process.argv);
+
+var requestsPerSecond = program.rate;
+var requests = program.requests;
+
+
+var url = program.args[0];
+
+if(!url) {
+  throw new Error('Requires url for crawling.');  
+}
+
+var opts = {
+  url: url,
+  requestsPerSecond: requestsPerSecond
+};
+
+var trafficFactory = new TrafficFactory(opts);
+trafficFactory.start();
+
+var duration = program.time || 60;
+var time = duration * 1000;
+
+
+function processData(data) {
+  
+}
+
+setTimeout(function() {
+  trafficFactory.kill();
+  processData(trafficFactory.events);
+}, time);
+
+['SIGINT', 'SIGTERM'].forEach(function(signal) {
+  process.on(signal, function() {
+    trafficFactory.kill();  
+  });
+});
