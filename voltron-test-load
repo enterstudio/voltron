@@ -112,10 +112,12 @@ function processData(data) {
 var duration = program.time || 60;
 var time = duration * 1000;
 
-setTimeout(function() {
-  peerFactory.kill();
-  processData(peerFactory.events);
-}, time);
+if(time !== 0) {
+  setTimeout(function() {
+    peerFactory.kill();
+    processData(peerFactory.events);
+  }, time);
+}
 
 ['SIGINT', 'SIGTERM'].forEach(function(signal) {
   process.on(signal, function() {

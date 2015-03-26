@@ -2,6 +2,7 @@
 
 var program = require('commander');
 var TrafficFactory = require('./lib/traffic_factory');
+var Rx = require('rx');
 
 program
   .option('-u --usage', 'Target server has usage module installed.')
@@ -38,9 +39,38 @@ var time = duration * 1000;
 
 
 function processData(data) {
-  data.forEach(function(ev) {
-    console.log(ev);  
-  }); 
+  var events = Rx.Observable.from(data);
+
+  var okStatusCode = events
+    .groupBy(function(o) {
+       return o.url; 
+    }).subscribe(function(obs) {
+      var avg = obs
+      .filter(function(ev) {
+        return ev.statusCode === 200;
+      })
+      .average(function(ev) {
+        return ev.duration;
+      });
+
+
+      var path = obs
+        .distinct(function(o) {
+          return o.url;  
+        })
+        .select(function(o) {
+          return o.url;  
+        });
+
+      var source = avg.forkJoin(path, function(avg, path) {
+        return { avg: avg, path: path };  
+      });
+      source
+      .subscribe(function(avgDuration) {
+        console.log('Average Duration:' + JSON.stringify(avgDuration));
+      });
+    });
+    
 }
 
 setTimeout(function() {
