@@ -3,6 +3,8 @@
 var program = require('commander');
 var TrafficFactory = require('./lib/traffic_factory');
 var Rx = require('rx');
+var TrafficProcessor = require('./lib/traffic_processor');
+var table = require('cli-table');
 
 program
   .option('-u --usage', 'Target server has usage module installed.')
@@ -39,39 +41,42 @@ var time = duration * 1000;
 
 
 function processData(data) {
-  var events = Rx.Observable.from(data);
+  var trafficProcessor = new TrafficProcessor(data);
+  trafficProcessor.start(function(d) {
+    var header1 = ['code', 'average'];
+    var header2 = ['path', 'average'];
 
-  var okStatusCode = events
-    .groupBy(function(o) {
-       return o.url; 
-    }).subscribe(function(obs) {
-      var avg = obs
-      .filter(function(ev) {
-        return ev.statusCode === 200;
-      })
-      .average(function(ev) {
-        return ev.duration;
-      });
-
-
-      var path = obs
-        .distinct(function(o) {
-          return o.url;  
-        })
-        .select(function(o) {
-          return o.url;  
-        });
-
-      var source = avg.forkJoin(path, function(avg, path) {
-        return { avg: avg, path: path };  
-      });
-      source
-      .subscribe(function(avgDuration) {
-        console.log('Average Duration:' + JSON.stringify(avgDuration));
-      });
+    var t1 = new table({
+      head: header1  
     });
-    
+    var t2 = new table({
+      head: header2  
+    });
+
+    d.filter(function(p) {return p.type === 'code';}).forEach(function(p) {
+      t1.push([p.code, p.avg]);  
+    });
+
+    d.filter(function(p) {return p.type === 'path';}).forEach(function(p) {
+      t2.push([p.path, p.avg]);  
+    });
+
+    d.filter(function(p) {return p.type ==='overall';}).forEach(function(p) {
+      console.log('Overall request average duration:' + p.avg);
+    });
+
+    console.log('Average request time by status code');
+    console.log(t1.toString());
+
+    console.log('Average request time by path.');
+    console.log(t2.toString());
+  });  
+
+  
+
+  
 }
+
 
 setTimeout(function() {
   trafficFactory.kill();
