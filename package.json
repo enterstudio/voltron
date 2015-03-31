@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Load test Zetta connections.",
   "main": "cli",
-  "bin":"voltron",
+  "bin": "voltron",
   "dependencies": {
     "cli-table": "^0.3.1",
     "commander": "^2.7.1",
@@ -16,7 +16,7 @@
     "zetta": "^0.23.0",
     "zetta-led-mock-driver": "^0.7.1",
     "zetta-photocell-mock-driver": "^0.4.0",
-    "zrx": "^0.2.0"
+    "zrx": "^0.3.0"
   },
   "devDependencies": {},
   "scripts": {
