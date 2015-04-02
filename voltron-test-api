@@ -7,7 +7,6 @@ var TrafficProcessor = require('./lib/traffic_processor');
 var table = require('cli-table');
 
 program
-  .option('-u --usage', 'Target server has usage module installed.')
   .option('-r --requests <requests>', 'Requests to send', parseInt)
   .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60', parseInt)
   .option('-c --clients <number>', 'Number of clients to generate', parseInt)
