@@ -1,6 +1,6 @@
 {
   "name": "voltron",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Load test Zetta connections.",
   "main": "cli",
   "bin": "voltron",
