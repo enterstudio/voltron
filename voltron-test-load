@@ -6,6 +6,7 @@ var progress = require('progress');
 var table = require('cli-table');
 var PeerFactory = require('./lib/peer_factory');
 var path = require('path');
+var csvProcess = require('./lib/format_load_csv');
 
 program
   .option('-i --instances <number>', 'Number of instances to start. Default 10.', parseInt)
@@ -15,6 +16,8 @@ program
   .option('-s, --silent', 'Silence output')
   .option('--spec <path>', 'Specification file path.')
   .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60.')
+  .option('--csv', 'Format output as csv.')
+  .option('--csv-headers', 'Add headers to csv output.')
   .parse(process.argv);
 
 var url = program.args[0];
@@ -63,9 +66,6 @@ var opts = {
   instances: instances  
 };
 
-console.log('Beginning process spawn.');
-
-var bar = new progress(':bar', { total: instances });
 
 if(!url) {
   return new Error('Server URL must be provided');
@@ -73,13 +73,18 @@ if(!url) {
 
 var peerFactory = new PeerFactory(opts);
 
-peerFactory.on('connect', function() {
-  bar.tick();
-  if(bar.complete) {
-   console.log('Completed process spawn. Waiting for connections...');  
-  }
-});
- 
+if (!program.csv) {
+  console.log('Beginning process spawn.');
+
+  var bar = new progress(':bar', { total: instances });
+  peerFactory.on('connect', function() {
+    bar.tick();
+    if(bar.complete) {
+      console.log('Completed process spawn. Waiting for connections...');  
+    }
+  });
+}
+
 peerFactory.start();
 
 function processData(data) {
@@ -116,7 +121,12 @@ var time = duration * 1000;
 if(time !== 0) {
   setTimeout(function() {
     peerFactory.kill();
-    processData(peerFactory.events);
+    
+    if (!program.csv) {     
+      processData(peerFactory.events);
+    } else {
+      csvProcess(opts, peerFactory, program.csvHeaders);
+    }
   }, time);
 }
 
