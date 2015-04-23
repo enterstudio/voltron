@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var WsFactory = require('./lib/ws_factory');
+var path = require('path');
+
+program
+  .option('-i --instances <number>', 'Number of instances to start. Default 10.', parseInt)
+  .option('-f, --file', 'Output to a file')
+  .option('-s, --silent', 'Silence output')
+  .option('--spec <path>', 'Specification file path.')
+  .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60.')
+  .option('--csv', 'Format output as csv.')
+  .option('--csv-headers', 'Add headers to csv output.')
+  .parse(process.argv);
+
+var url = program.args[0];
+var instances = 10;
+
+
+if(program.instances) {
+  instances = program.instances;
+}
+
+var templatePath = path.join(__dirname, './lib/ws_template.js');
+
+var opts = {
+  url: url,
+  instances: instances,
+  templatePath: templatePath
+};
+
+var factory = new WsFactory(opts);
+factory.start();
+
+var duration = program.time || 60;
+var time = duration * 1000;
+
+function processData(data) {
+  console.log(data);  
+}
+
+if(time !== 0) {
+  setTimeout(function() {
+    factory.kill();
+    processData(factory.usage);
+  }, time);
+}
+
+['SIGINT', 'SIGTERM'].forEach(function(signal) {
+  process.on(signal, function() {
+    factory.kill();  
+  });
+});
