@@ -23,7 +23,29 @@ if(program.instances) {
   instances = program.instances;
 }
 
+var configTime = program.time || 60;
+
 var templatePath = path.join(__dirname, './lib/ws_template.js');
+
+if(program.spec) {
+  var spec = require(program.spec);
+
+  if(spec.instances) {
+    instances = spec.instances;
+  }
+
+  if(spec.template) {
+    templatePath = spec.template;
+  }
+
+  if(spec.url) {
+    url = spec.url;  
+  }
+
+  if(spec.hasOwnProperty('time')) {
+    configTime = spec.time;  
+  }
+}
 
 var opts = {
   url: url,
@@ -34,7 +56,7 @@ var opts = {
 var factory = new WsFactory(opts);
 factory.start();
 
-var duration = program.time || 60;
+var duration = configTime;
 var time = duration * 1000;
 
 function processData(data) {
