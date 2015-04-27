@@ -40,24 +40,36 @@ if(program.actuators) {
   actuators = program.actuators;
 }
 
+var configTime = program.time || 60;
+
 var templatePath = path.join(__dirname, './lib/load_template.js');
 if(program.spec) {
-  var spec = require(program.path);
+  var spec = require(program.spec);
+
   if(spec.instances) {
     instances = spec.instances;
   }
-  if(program.sensors) {
+  if(spec.sensors) {
     sensors = spec.sensors;
   }
 
-  if(program.actuators) {
+  if(spec.actuators) {
     actuators = spec.actuators;
   }
 
   if(spec.template) {
     templatePath = spec.template;
   }
+
+  if(spec.url) {
+    url = spec.url;  
+  }
+
+  if(spec.hasOwnProperty('time')) {
+    configTime = spec.time;  
+  }
 }
+
 var opts = {
   url: url,
   sensors: sensors,
@@ -65,7 +77,6 @@ var opts = {
   templatePath: templatePath,
   instances: instances  
 };
-
 
 if(!url) {
   return new Error('Server URL must be provided');
@@ -115,7 +126,8 @@ function processData(data) {
   console.log(t2.toString());
 }
 
-var duration = program.time || 60;
+
+var duration =  configTime;
 var time = duration * 1000;
 
 if(time !== 0) {
