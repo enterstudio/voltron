@@ -3,6 +3,7 @@
 var program = require('commander');
 var WsFactory = require('./lib/ws_factory');
 var path = require('path');
+var table = require('cli-table');
 
 program
   .option('-i --instances <number>', 'Number of instances to start. Default 10.', parseInt)
@@ -37,9 +38,19 @@ var duration = program.time || 60;
 var time = duration * 1000;
 
 function processData(data) {
-  console.log(data);  
-}
+  var connectTableTemplate = ['client id', 'bytes received', 'topic', 'timestamp'];
+  
+  var t1 = new table({
+    head: connectTableTemplate
+  });
 
+  Object.keys(data).forEach(function(k) {
+    var ev = data[k];
+    t1.push([ev.clientId, ev.bytesReceived, ev.topic, ev.timestamp]); 
+  });
+
+  console.log(t1.toString());
+}
 if(time !== 0) {
   setTimeout(function() {
     factory.kill();
