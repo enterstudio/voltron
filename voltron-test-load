@@ -21,6 +21,11 @@ program
   .parse(process.argv);
 
 var url = program.args[0];
+if(!url) {
+  program.help();
+  process.exit(1);
+}
+
 var instances = 10;
 var sensors = 0;
 var actuators = 0;
