@@ -20,6 +20,10 @@ var clients = program.clients;
 
 
 var url = program.args[0];
+if(!url) {
+  program.help();
+  process.exit(1);
+}
 
 if(!url) {
   throw new Error('Requires url for crawling.');  

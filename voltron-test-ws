@@ -11,12 +11,17 @@ program
   .option('-s, --silent', 'Silence output')
   .option('--spec <path>', 'Specification file path.')
   .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60.')
-  .option('--csv', 'Format output as csv.')
-  .option('--csv-headers', 'Add headers to csv output.')
+  .option('--csv', 'Format output as csv. <not implemented>')
+  .option('--csv-headers', 'Add headers to csv output. <not implemented>')
   .parse(process.argv);
 
 var url = program.args[0];
 var instances = 10;
+
+if(!url) {
+  program.help();
+  process.exit(1);
+}
 
 
 if(program.instances) {
