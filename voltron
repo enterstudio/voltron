@@ -4,5 +4,6 @@ var program = require('commander');
 
 program
   .command('test', 'Load test cluster with z2z protocol')
+  .command('api', 'Start voltron as an API')
   .parse(process.argv);
 
