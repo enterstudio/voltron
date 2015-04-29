@@ -5,4 +5,5 @@ var program = require('commander');
 program
   .command('load', 'Start a Z2Z load test.')
   .command('api', 'Start an Zetta specific API Load test.')
+  .command('ws', 'Start a subscription to websockets in a Zetta API.')
   .parse(process.argv);

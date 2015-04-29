@@ -1,0 +1,87 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var WsFactory = require('./lib/ws_factory');
+var path = require('path');
+var table = require('cli-table');
+
+program
+  .option('-i --instances <number>', 'Number of instances to start. Default 10.', parseInt)
+  .option('-f, --file', 'Output to a file')
+  .option('-s, --silent', 'Silence output')
+  .option('--spec <path>', 'Specification file path.')
+  .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60.')
+  .option('--csv', 'Format output as csv.')
+  .option('--csv-headers', 'Add headers to csv output.')
+  .parse(process.argv);
+
+var url = program.args[0];
+var instances = 10;
+
+
+if(program.instances) {
+  instances = program.instances;
+}
+
+var configTime = program.time || 60;
+
+var templatePath = path.join(__dirname, './lib/ws_template.js');
+
+if(program.spec) {
+  var spec = require(program.spec);
+
+  if(spec.instances) {
+    instances = spec.instances;
+  }
+
+  if(spec.template) {
+    templatePath = spec.template;
+  }
+
+  if(spec.url) {
+    url = spec.url;  
+  }
+
+  if(spec.hasOwnProperty('time')) {
+    configTime = spec.time;  
+  }
+}
+
+var opts = {
+  url: url,
+  instances: instances,
+  templatePath: templatePath
+};
+
+var factory = new WsFactory(opts);
+factory.start();
+
+var duration = configTime;
+var time = duration * 1000;
+
+function processData(data) {
+  var connectTableTemplate = ['client id', 'bytes received', 'topic', 'timestamp'];
+  
+  var t1 = new table({
+    head: connectTableTemplate
+  });
+
+  Object.keys(data).forEach(function(k) {
+    var ev = data[k];
+    t1.push([ev.clientId, ev.bytesReceived, ev.topic, ev.timestamp]); 
+  });
+
+  console.log(t1.toString());
+}
+if(time !== 0) {
+  setTimeout(function() {
+    factory.kill();
+    processData(factory.usage);
+  }, time);
+}
+
+['SIGINT', 'SIGTERM'].forEach(function(signal) {
+  process.on(signal, function() {
+    factory.kill();  
+  });
+});

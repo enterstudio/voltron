@@ -2,5 +2,6 @@
   "instances": 10,
   "sensors":1,
   "actuators":1,
-  "template":"./template_test.js"  
+  "time": 0,
+  "url": "http://zt-1-mdobs.herokuapp.com"
 }
