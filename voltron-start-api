@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var zetta = require('zetta');
+var WsDevice = require('./lib/api/ws_device');
+var PeerDevice = require('./lib/api/peer_device');
+var ApiDevice = require('./lib/api/api_device');
+
+program
+  .option('-p --port <port>', 'port number for server to listen on.')
+  .option('-l --link <link>', 'link the voltron API to another zetta.')
+  .parse(process.argv);
+
+var port = 1337 || program.port;
+
+var z = zetta();
+
+if(program.link) {
+  z.link(program.link);
+}
+
+  z.silent()
+  .name('voltron')
+  .use(WsDevice)
+  .use(PeerDevice)
+  .use(ApiDevice)
+  .listen(port, function() {
+    console.log('Voltron API Started');
+  });
+
