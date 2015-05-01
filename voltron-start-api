@@ -7,11 +7,11 @@ var PeerDevice = require('./lib/api/peer_device');
 var ApiDevice = require('./lib/api/api_device');
 
 program
-  .option('-p --port <port>', 'port number for server to listen on.')
+  .option('-p --port <port>', 'port number for server to listen on.', parseInt)
   .option('-l --link <link>', 'link the voltron API to another zetta.')
   .parse(process.argv);
 
-var port = 1337 || program.port;
+var port =  program.port || 1337;
 
 var z = zetta();
 
