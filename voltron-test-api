@@ -74,12 +74,13 @@ function processData(data) {
     console.log('Average request time by path.');
     console.log(t2.toString());
   });  
-
-  
-
-  
 }
 
+function processCsv(data) {
+  var trafficProcessor = new TrafficProcessor(data);
+  trafficProcessor.start(function(d) {
+  });
+}
 
 setTimeout(function() {
   trafficFactory.kill();
