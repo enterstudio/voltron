@@ -88,15 +88,19 @@ if(!url) {
 }
 
 var peerFactory = new PeerFactory(opts);
+var completed = false;
 
 if (!program.csv) {
   console.log('Beginning process spawn.');
 
   var bar = new progress(':bar', { total: instances });
   peerFactory.on('connect', function() {
-    bar.tick();
-    if(bar.complete) {
-      console.log('Completed process spawn. Waiting for connections...');  
+    if(!completed) {
+      bar.tick();
+      if(bar.complete) {
+        completed = true;
+        console.log('Completed process spawn. Waiting for connections...');  
+      }
     }
   });
 }
