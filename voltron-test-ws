@@ -65,7 +65,7 @@ var duration = configTime;
 var time = duration * 1000;
 
 function processData(data) {
-  var connectTableTemplate = ['client id', 'bytes received', 'topic', 'timestamp'];
+  var connectTableTemplate = ['client id', 'bytes received', 'bytes per second', 'topic', 'timestamp'];
   
   var t1 = new table({
     head: connectTableTemplate
@@ -73,7 +73,7 @@ function processData(data) {
 
   Object.keys(data).forEach(function(k) {
     var ev = data[k];
-    t1.push([ev.clientId, ev.bytesReceived, ev.topic, ev.timestamp]); 
+    t1.push([ev.clientId, ev.bytesReceived, ev.bytesReceived / time, ev.topic, ev.timestamp]); 
   });
 
   console.log(t1.toString());
