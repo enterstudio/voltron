@@ -5,12 +5,15 @@ var TrafficFactory = require('./lib/traffic_factory');
 var Rx = require('rx');
 var TrafficProcessor = require('./lib/traffic_processor');
 var table = require('cli-table');
+var csv = require('./lib/format_api_csv');
 
 program
   .option('-r --requests <requests>', 'Requests to send', parseInt)
   .option('-t --time <time>', 'Time in seconds to run test for. Defaults to 60', parseInt)
   .option('-c --clients <number>', 'Number of clients to generate', parseInt)
   .option('-rps --rate <number>', 'Number of requests per second', parseInt)
+  .option('--csv', 'Print data in raw CSV form')
+  .option('--csv-headers', 'Print headers on CSV output')
   .parse(process.argv);
 
 var requestsPerSecond = program.rate;
@@ -84,7 +87,12 @@ function processCsv(data) {
 
 setTimeout(function() {
   trafficFactory.kill();
-  processData(trafficFactory.events);
+  if(program.csv) {
+    csv(trafficFactory, program.csvHeaders);
+  } else {
+    processData(trafficFactory.events);
+  }
+  
 }, time);
 
 ['SIGINT', 'SIGTERM'].forEach(function(signal) {

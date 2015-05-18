@@ -73,7 +73,7 @@ function processData(data) {
 
   Object.keys(data).forEach(function(k) {
     var ev = data[k];
-    t1.push([ev.clientId, ev.bytesReceived, ev.bytesReceived / time, ev.topic, ev.timestamp]); 
+    t1.push([ev.clientId, ev.bytesReceived, ev.bytesReceived / duration, ev.topic, ev.timestamp]); 
   });
 
   console.log(t1.toString());
