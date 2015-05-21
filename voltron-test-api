@@ -51,12 +51,16 @@ function processData(data) {
   trafficProcessor.start(function(d) {
     var header1 = ['code', 'average'];
     var header2 = ['path', 'average'];
+    var header3 = ['error', 'count'];
 
     var t1 = new table({
       head: header1  
     });
     var t2 = new table({
       head: header2  
+    });
+    var t3 = new table({
+      head: header3
     });
 
     d.filter(function(p) {return p.type === 'code';}).forEach(function(p) {
@@ -67,22 +71,25 @@ function processData(data) {
       t2.push([p.path, p.avg]);  
     });
 
+    d.filter(function(p) { return p.type === 'err'; }).forEach(function(p) {
+      t3.push([p.message, p.count]);
+    });
+
     d.filter(function(p) {return p.type ==='overall';}).forEach(function(p) {
       console.log('Overall request average duration:' + p.avg);
     });
+
+   
 
     console.log('Average request time by status code');
     console.log(t1.toString());
 
     console.log('Average request time by path.');
     console.log(t2.toString());
-  });  
-}
 
-function processCsv(data) {
-  var trafficProcessor = new TrafficProcessor(data);
-  trafficProcessor.start(function(d) {
-  });
+    console.log('Client errors in test.');
+    console.log(t3.toString());
+  });  
 }
 
 setTimeout(function() {
